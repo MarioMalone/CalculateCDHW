@@ -9,12 +9,12 @@ import regionmask
 
 # --- Configuration ---
 DATA_DIR = "data"
-TMAX_FILES_PATTERN = os.path.join(DATA_DIR, "gfdl-esm4_r1i1p1f1_w5e5_historical_tasmax_global_daily_*.nc")
+TMAX_FILES_PATTERN = os.path.join(DATA_DIR, "MaxTemp_Merged_0.5deg", "ERA5_MaxTemp_*_0.5deg.nc")
 SPEI_FILE = os.path.join(DATA_DIR, "spei03.nc")
 MAIZE_AREA_FILE = os.path.join(DATA_DIR, "spam2000v3r7_harvested-area_MAIZ.tif")
 GROWING_SEASON_FILE = os.path.join(DATA_DIR, "global.maize.growing.season.csv")
 COUNTRIES_SHP_FILE = os.path.join(DATA_DIR, "ne_110m_admin_0_countries", "ne_110m_admin_0_countries.shp")
-OUTPUT_FILE = os.path.join(DATA_DIR, "cdhw_country_annual_summary.csv")
+OUTPUT_FILE = os.path.join(DATA_DIR, "cdhw_country_annual_summary_AgERA5.csv")
 
 # Thresholds
 T_THRESH_C_29 = 29.0
@@ -37,7 +37,10 @@ def process_chunk(tmax_file, ds_spei, da_area, df_gs, countries):
 
     # 1. Data Loading and Alignment (same as before)
     ds_tmax = xr.open_dataset(tmax_file)
-    ds_tmax = ds_tmax.rename({'tasmax': 'tmax'})
+    # obtain the variable name list from nc dataset 
+    variables = list(ds_tmax.data_vars) 
+    # rename the first variable to 'tmax'
+    ds_tmax = ds_tmax.rename({variables[0]: 'tmax'})
     ds_tmax.rio.write_crs("EPSG:4326", inplace=True)
 
     ds_spei_aligned = ds_spei.interp_like(ds_tmax, method='nearest')
